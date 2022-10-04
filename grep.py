@@ -1,96 +1,92 @@
 import sys
 import os
 
-folder_name, keyword, mode = 'mydir', 'mat pag', True
+mode, condition = 'cs', 'normal'
 
 if len(sys.argv) == 3:
-    keyword = sys.argv[1]
-    folder_name = sys.argv[2]
+    keyword, folder_name = sys.argv[1], sys.argv[2]
 elif len(sys.argv) == 4:
-    mode = sys.argv[1]
-    keyword = sys.argv[2]
-    folder_name = sys.argv[3]
+    mode, keyword, folder_name = sys.argv[1], sys.argv[2], sys.argv[3]
+    if (not mode == '-w') ^ (mode == '-i'):
+        print('Argumen program tidak benar.')
+        sys.exit()
 
 
-def is_whole_word(line, word):
-    first_index = line.find(word)
-    last_index = first_index + len(word)
-    if word in line:
-        if word.count('*') == 1:
-            splitted_words = word.split('*')
-            first_index_splitted = line.find(splitted_words[0])
-            last_index_splitted = line.find(splitted_words[1]+len(splitted_words[1]))
-            if word.find('*') == 0 and line[last_index+1] == ' ':
-                return True
-            elif word.find('*') == len(word) - 1 and line[first_index - 1] == ' ':
-                return True
-            elif line[first_index_splitted - 1] == ' ' and line[last_index_splitted + 1] == ' ':
+def wholeword_checker(key, line, con='normal'):
+    index_start = line.find(key)
+    index_end = line.find(key) + len(key) - 1
+    if con == 'start':
+        if index_start == 0 or key == '':
+            return True
+        elif line[index_start - 1] == ' ':
+            return True
+        else:
+            return False
+    if con == 'end':
+        if index_end == len(line) - 2 or key == '':
+            return True
+        elif line[index_end + 1] == ' ':
+            return True
+        else:
+            return False
+    if con == 'normal':
+        if index_start == 0 and line[index_end + 1] == ' ':
+            return True
+        elif not index_start == 0 and not index_end == len(line) - 1:
+            if line[index_start - 1] == ' ' and (line[index_end + 1] == ' ' or line[index_end + 1] == '\n'):
                 return True
             else:
                 return False
-        elif word.count('*') == 0:
-            if first_index == 0 and last_index == len(line) - 1:
-                return True
-            elif first_index == 0 and line[last_index] == ' ':
-                return True
-            elif line[first_index - 1] == ' ' and last_index == len(line) - 1:
-                return True
-            if line[first_index - 1] == ' ' and line[last_index] == ' ':
-                return True
-            else:
-                return False
+        elif index_end == index_start + len(key) - 1 and line[index_start - 1] == ' ':
+            return True
         else:
             return False
 
 
-def scan_file(paths, word, opt='cs'):
-    file = open(paths, 'r')
-    if opt == '-w':
-        row = 0
-        for line in file:
-            row += 1
-            if is_whole_word(line, word):
-                splitted_words = word.split('*')
-                if len(splitted_words) == 1:
-                    if splitted_words[0] in line:
-                        print(f'{paths:<40s} line {row:<3d} {line.strip():<40s}')
-                elif len(splitted_words) == 2:
-                    if splitted_words[0] in line and splitted_words[1] in line:
-                        print(f'{paths:<40s} line {row:<3d} {line.strip():<40s}')
-                else:
-                    print('what')
+def print_result(pth, row_num, line):
+    print(f'{pth:<40s} line {row_num:<3d} {line.strip():<40s}')
 
-    elif opt == '-i':
-        row = 0
-        for line in file:
-            row += 1
-            splitted_words = word.split('*')
-            if len(splitted_words) == 1:
-                if splitted_words[0].casefold() in line.casefold():
-                    print(f'{paths:<40s} line {row:<3d} {line.strip():<40s}')
-            elif len(splitted_words) == 2:
-                if splitted_words[0].casefold() in line.casefold() \
-                        and splitted_words[1].casefold() in line.casefold():
-                    print(f'{paths:<40s} line {row:<3d} {line.strip():<40s}')
-    elif opt == 'cs':
-        row = 0
-        for line in file:
-            row += 1
-            splitted_words = word.split('*')
-            if len(splitted_words) == 1:
-                if splitted_words[0] in line:
-                    print(f'{paths:<40s} line {row:<3d} {line.strip():<40s}')
-            elif len(splitted_words) == 2:
-                if splitted_words[0] in line and splitted_words[1] in line:
-                    print(f'{paths:<40s} line {row:<3d} {line.strip():<40s}')
+
+def scan_file(pth, key, opt='cs'):
+    file = open(pth, 'r')
+    row_num = 0
+    if key.count('*') == 0:
+        for lines in file:
+            row_num += 1
+            if opt == 'cs' and key in lines:
+                print_result(pth, row_num, lines)
+            elif opt == '-w' and key in lines and wholeword_checker(key, lines, 'normal'):
+                print_result(pth, row_num, lines)
+            elif opt == '-i' and key.casefold() in lines.casefold():
+                print_result(pth, row_num, lines)
+    elif key.count('*') == 1:
+        for lines in file:
+            row_num += 1
+            first_word, second_word = key.split('*')
+            if opt == 'cs' and first_word in lines and second_word in lines and \
+                    lines.find(first_word) < lines.find(second_word):
+                print_result(pth, row_num, lines)
+            elif opt == '-w' and wholeword_checker(first_word, lines, 'start')\
+                    and wholeword_checker(second_word, lines, 'end'):
+                print_result(pth, row_num, lines)
+            elif opt == '-i' and first_word.casefold() in lines.casefold() and \
+                    second_word.casefold() in lines.casefold():
+                print_result(pth, row_num, lines)
+
+
+try:
+    if folder_name.endswith('.txt'):
+        scan_file(folder_name, keyword, mode)
     else:
-        print('Input tidak valid.')
-    file.close()
-
-
-for dirpath, dirnames, filenames in os.walk(folder_name):
-    for files in filenames:
-        if files.endswith('.txt'):
-            path = [os.path.join(dirpath, files)]
-            rel_path = path[0]
-            scan_file(rel_path, keyword, mode)
+        checks = 0
+        for dirpath, dirnames, filenames in os.walk(folder_name):
+            checks += 1
+            for files in filenames:
+                if files.endswith('.txt'):
+                    path = [os.path.join(dirpath, files)]
+                    rel_path = path[0]
+                    scan_file(rel_path, keyword, mode)
+        if checks == 0:
+            print(f'Path {folder_name} tidak ditemukan.')
+except IOError:
+    pass
