@@ -10,6 +10,9 @@ elif len(sys.argv) == 4:
     if (not mode == '-w') ^ (mode == '-i'):
         print('Argumen program tidak benar.')
         sys.exit()
+else:
+    print('Argumen program tidak benar.')
+    sys.exit()
 
 
 def wholeword_checker(key, line, con='normal'):
