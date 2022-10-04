@@ -16,16 +16,12 @@ def wholeword_checker(key, line, con='normal'):
     index_start = line.find(key)
     index_end = line.find(key) + len(key) - 1
     if con == 'start':
-        if index_start == 0 or key == '':
-            return True
-        elif line[index_start - 1] == ' ':
+        if (index_start == 0 or key == '') or (line[index_start - 1] == ' '):
             return True
         else:
             return False
     if con == 'end':
-        if index_end == len(line) - 2 or key == '':
-            return True
-        elif line[index_end + 1] == ' ':
+        if (index_end == len(line) - 2 or key == '') or (line[index_end + 1] == ' '):
             return True
         else:
             return False
