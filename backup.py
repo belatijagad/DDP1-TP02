@@ -17,31 +17,34 @@ else:
 
 # Pengecekan secara menyeluruh, memastikan output sesuai dengan option input
 def checker(key, row, row_num, pth, opt='cs'):
-    words = key.split('*')
+    keywords = key.split('*')
     if key.count('*') > 1:
         print('Argumen program tidak benar.')
         sys.exit()
-    words = list(filter(None, words))
+    keywords = list(filter(None, keywords))
     if opt == 'cs':
-        if len(words) == 1 and words[0] in row:
+        if len(keywords) == 1 and keywords[0] in row:
             print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
-        elif len(words) == 2 and words[0] in row and words[1] in row and \
-                early_checker(words[0], words[1], row):
+        elif len(keywords) == 2 and keywords[0] in row and keywords[1] in row and \
+                early_checker(keywords[0], keywords[1], row):
             print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
     elif opt == '-i':
-        if len(words) == 1 and words[0].casefold() in row.casefold():
+        if len(keywords) == 1 and keywords[0].casefold() in row.casefold():
             print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
-        elif len(words) == 2 and words[0].casefold() in row.casefold() and \
-                words[1].casefold() in row.casefold() and early_checker(words[0], words[1], row, opt):
+        elif len(keywords) == 2 and keywords[0].casefold() in row.casefold() and \
+                keywords[1].casefold() in row.casefold() and early_checker(keywords[0], keywords[1], row, opt):
             print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
     elif opt == '-w':
-        if len(words) == 1:
-            if (' ' + words[0] + ' ') in row or row.find(words[0]) == 0 and row[len(words[0])] == ' ' or \
-                    row.rfind(words[0]) == abs(len(row.strip()) - len(words[0])) and row.find(' ' + words[0]):
+        if len(keywords) == 1:
+            if (' ' + keywords[0] + ' ') in row:
                 print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
-        elif len(words) == 2 and early_checker(words[0], words[1], row) and words[0] in row and words[1] in row:
-            if (' ' + words[0] in row or row.find(words[0]) == 0) and \
-                    (words[1] + ' ' in row or row.find(words[1]) == len(row.strip())-len(words[1])):
+            elif row.find(keywords[0]) == 0 and row[len(keywords[0])] == ' ':
+                print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+            elif row.rfind(keywords[0]) == abs(len(row.strip()) - len(keywords[0])) and row.find(' ' + keywords[0]):
+                print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+        elif len(keywords) == 2 and early_checker(keywords[0], keywords[1], row) and keywords[0] in row and keywords[1] in row:
+            if (' ' + keywords[0] in row or row.find(keywords[0]) == 0) and \
+                    (keywords[1] + ' ' in row or row.find(keywords[1]) == len(row.strip())-len(keywords[1])):
                 print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
 
 # Pemeriksaan file satu persatu. Menjalankan function checker setiap iterasi
