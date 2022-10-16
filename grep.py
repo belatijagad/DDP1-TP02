@@ -16,6 +16,7 @@ else:
     sys.exit()
 
 # Pengecekan secara menyeluruh, memastikan output sesuai dengan option input
+# Untuk wildcard -w akan menganggap valid spasi di antara kedua kata.
 def checker(key, row, row_num, pth, opt='cs'):
     words = key.split('*')
     if key.count('*') > 1:
@@ -24,25 +25,25 @@ def checker(key, row, row_num, pth, opt='cs'):
     words = list(filter(None, words))
     if opt == 'cs':
         if len(words) == 1 and words[0] in row:
-            print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+            print(f'{pth:<40s} line {row_num:<3d} {row.strip()[0:min(40, len(row.strip()))]:<40s}')
         elif len(words) == 2 and words[0] in row and words[1] in row and \
                 early_checker(words[0], words[1], row):
-            print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+            print(f'{pth:<40s} line {row_num:<3d} {row.strip()[0:min(40, len(row.strip()))]:<40s}')
     elif opt == '-i':
         if len(words) == 1 and words[0].casefold() in row.casefold():
-            print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+            print(f'{pth:<40s} line {row_num:<3d} {row.strip()[0:min(40, len(row.strip()))]:<40s}')
         elif len(words) == 2 and words[0].casefold() in row.casefold() and \
                 words[1].casefold() in row.casefold() and early_checker(words[0], words[1], row, opt):
-            print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+            print(f'{pth:<40s} line {row_num:<3d} {row.strip()[0:min(40, len(row.strip()))]:<40s}')
     elif opt == '-w':
         if len(words) == 1:
             if (' ' + words[0] + ' ') in row or row.find(words[0]) == 0 and row[len(words[0])] == ' ' or \
                     row.rfind(words[0]) == abs(len(row.strip()) - len(words[0])) and row.find(' ' + words[0]):
-                print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+                print(f'{pth:<40s} line {row_num:<3d} {row.strip()[0:min(40, len(row.strip()) )]:<40s}')
         elif len(words) == 2 and early_checker(words[0], words[1], row) and words[0] in row and words[1] in row:
             if (' ' + words[0] in row or row.find(words[0]) == 0) and \
                     (words[1] + ' ' in row or row.find(words[1]) == len(row.strip())-len(words[1])):
-                print(f'{pth:<40s} line {row_num:<3d} {row.strip():<40s}')
+                print(f'{pth:<40s} line {row_num:<3d} {row.strip()[0:min(40, len(row.strip()) )]:<40s}')
 
 # Pemeriksaan file satu persatu. Menjalankan function checker setiap iterasi
 def scan_file(pth, key, opt='cs'):
@@ -56,8 +57,10 @@ def scan_file(pth, key, opt='cs'):
 # Pengecekan apakah kata potongan (khusus wildcard) kedua mendahului kata pertama, jika iya, return False
 def early_checker(first_split, second_split, row, opt='cs'):
     if (opt == 'cs' or opt == '-w') and row.find(first_split) < row.rfind(second_split) or \
-            (opt == '-i' and row.lower().find(first_split.lower()) < row.lower().rfind(second_split.lower())):
-        return True
+            opt == '-i' and row.lower().find(first_split.lower()) < row.lower().rfind(second_split.lower()):
+        if (opt == 'cs' or opt == '-w') and row.find(first_split) + len(first_split) - 1 < row.rfind(second_split) or \
+                opt == '-i' and row.lower().find(first_split.lower()) + len(first_split) - 1 < row.lower().rfind(second_split.lower()):
+            return True
     return False
 
 
